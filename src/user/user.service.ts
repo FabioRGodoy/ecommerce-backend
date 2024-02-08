@@ -30,7 +30,16 @@ export class UserService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    const data = this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    const user = {
+      ...data,
+      password: undefined,
+    };
+
+    return user;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
