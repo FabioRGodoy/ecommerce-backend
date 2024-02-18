@@ -13,10 +13,7 @@ export class ProductService {
         data: {
           ...createProductDto,
           // categories: {
-          //   create: [
-          //     { category: { connect: { id: 1 } } },
-          //     { category: { connect: { id: 2 } } },
-          //   ],
+          //   create: [{ category: { connect: { id: 1 } } }],
           // },
         },
         // include: {
@@ -42,6 +39,9 @@ export class ProductService {
       return await this.prisma.product.findUnique({
         where: {
           id,
+        },
+        include: {
+          categories: true,
         },
       });
     } catch (error) {
