@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -12,7 +12,16 @@ export class ProductService {
       const newProduct = await this.prisma.product.create({
         data: {
           ...createProductDto,
+          // categories: {
+          //   create: [
+          //     { category: { connect: { id: 1 } } },
+          //     { category: { connect: { id: 2 } } },
+          //   ],
+          // },
         },
+        // include: {
+        //   categories: true,
+        // },
       });
       return newProduct;
     } catch (error) {
@@ -49,7 +58,10 @@ export class ProductService {
 
       return updateProduct;
     } catch (error) {
-      throw new Error('Erro ao editar produto');
+      throw new HttpException(
+        'Erro ao criar o produto',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
