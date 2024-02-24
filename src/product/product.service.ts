@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProductService {
@@ -9,20 +10,36 @@ export class ProductService {
 
   async create(createProductDto: CreateProductDto) {
     try {
+      const categoriesToConnect = createProductDto.categories.map((item) => ({
+        category: {
+          connect: {
+            id: item.id,
+          },
+        },
+      }));
+
+      delete createProductDto.categories;
+
       const newProduct = await this.prisma.product.create({
         data: {
           ...createProductDto,
-          // categories: {
-          //   create: [{ category: { connect: { id: 1 } } }],
-          // },
+          categories: {
+            create: categoriesToConnect,
+          },
         },
-        // include: {
-        //   categories: true,
-        // },
+        include: {
+          categories: true,
+        },
       });
+
       return newProduct;
     } catch (error) {
-      throw new Error('Erro ao criar o produto');
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new Error('Já existe um produto com este nome.');
+        }
+      }
+      throw new Error('Erro ao criar o produto.');
     }
   }
 
@@ -41,7 +58,17 @@ export class ProductService {
           id,
         },
         include: {
-          categories: true,
+          categories: {
+            select: {
+              category: {
+                select: {
+                  id: true,
+                  name: true,
+                  description: true,
+                },
+              },
+            },
+          },
         },
       });
     } catch (error) {
@@ -73,7 +100,10 @@ export class ProductService {
         },
       });
     } catch (error) {
-      throw new Error('Erro ao deletar produto');
+      throw new HttpException(
+        'Erro ao deletar produto',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
