@@ -6,53 +6,118 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  // provider = "postgresql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String
-  age       Int
   email     String  @unique
   password  String
-
-  @@index([email])
+  age       Int?
+  address   String?
+  city      String?
+  state     String?
+  zip       String?
+  phone     String?
+  cart      Cart?    @relation(name: "UserCart")
+  cartId    Int?
+  orders    Order[]
 }
 
 model Product {
-  id          String    @id @default(uuid())
+  id          Int      @id @default(autoincrement())
   name        String
-  description String
-  price       Float
-  imageUrl    String
+  description String?
+  price       Decimal
+  imageUrl    String?
   stock       Int
-  categories  CategoryOnProduct[]
-
+  categories  CategoryToProduct[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-
-  @@index([id])
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
 }
 
 model Category {
-  id          Int    @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
-  description String
-  products    CategoryOnProduct[]
+  description String?
+  products    CategoryToProduct[]
 }
 
-model CategoryOnProduct {
-  id          Int     @id @default(autoincrement())
-  productId   String
-  categoryId  Int
+model CategoryToProduct {
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  category  Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
 
-  product     Product @relation(fields: [productId], references: [id])
-  category    Category @relation(fields: [categoryId], references: [id])
+  @@id([productId, categoryId])
+}
 
-  @@index([productId])
-  @@index([categoryId])
+model Cart {
+  id            Int            @id @default(autoincrement())
+  user          User           @relation(name: "UserCart", fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int            @unique
+  items         CartItem[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model CartItem {
+  id             Int      @id @default(autoincrement())
+  cart           Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId         Int
+  product        Product  @relation(fields: [productId], references: [id])
+  productId      Int
+  quantity      Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Order {
+  id              Int           @id @default(autoincrement())
+  user            User          @relation(fields: [userId], references: [id])
+  userId          Int
+  orderDate       DateTime      @default(now())
+  orderStatus     OrderStatus
+  orderItems      OrderItem[]
+  shippingAddress String?
+  shippingCity    String?
+  shippingState   String?
+  shippingZip     String?
+  total           Decimal
+}
+
+model OrderItem {
+  id             Int      @id @default(autoincrement())
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId        Int
+  product        Product  @relation(fields: [productId], references: [id])
+  productId      Int
+  quantity      Int
+  unitPrice      Decimal
+}
+
+model VehicleBrand {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  models      VehicleModel[]
+}
+
+model VehicleModel {
+  id          Int          @id @default(autoincrement())
+  name        String
+  brand      VehicleBrand @relation(fields: [brandId], references: [id])
+  brandId    Int
 }
 
 
+enum OrderStatus {
+  Pending
+  Processing
+  Shipped
+  Delivered
+  Cancelled
+}
