@@ -9,6 +9,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
+import { MakeModule } from './make/make.module';
+import { BrandModule } from './brand/brand.module';
+import { ModelsModule } from './models/models.module';
 
 @Module({
   imports: [
@@ -17,6 +20,9 @@ import { CategoryModule } from './category/category.module';
     AuthModule,
     ProductModule,
     CategoryModule,
+    MakeModule,
+    BrandModule,
+    ModelsModule,
   ],
   controllers: [AppController, UserController],
   providers: [
