@@ -9,7 +9,6 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
-import { MakeModule } from './make/make.module';
 import { BrandModule } from './brand/brand.module';
 import { ModelsModule } from './models/models.module';
 
@@ -20,7 +19,6 @@ import { ModelsModule } from './models/models.module';
     AuthModule,
     ProductModule,
     CategoryModule,
-    MakeModule,
     BrandModule,
     ModelsModule,
   ],

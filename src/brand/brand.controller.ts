@@ -1,7 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { BrandService } from './brand.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
+import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 
 @Controller('brand')
 export class BrandController {
@@ -12,6 +21,7 @@ export class BrandController {
     return this.brandService.create(createBrandDto);
   }
 
+  @IsPublic()
   @Get()
   findAll() {
     return this.brandService.findAll();

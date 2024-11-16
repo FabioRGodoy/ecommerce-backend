@@ -36,10 +36,16 @@ export class ProductService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new Error('Já existe um produto com este nome.');
+          throw new HttpException(
+            'Já existe um produto com este nome.',
+            HttpStatus.CONFLICT,
+          );
         }
       }
-      throw new Error('Erro ao criar o produto.');
+      throw new HttpException(
+        'Erro ao criar o produto.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -47,16 +53,17 @@ export class ProductService {
     try {
       return await this.prisma.product.findMany();
     } catch (error) {
-      throw new Error('Erro ao buscar produtos');
+      throw new HttpException(
+        'Erro ao buscar produtos',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   async findOne(id: number) {
     try {
-      return await this.prisma.product.findUnique({
-        where: {
-          id,
-        },
+      const product = await this.prisma.product.findUnique({
+        where: { id },
         include: {
           categories: {
             select: {
@@ -71,22 +78,31 @@ export class ProductService {
           },
         },
       });
+
+      if (!product) {
+        throw new HttpException('Produto não encontrado', HttpStatus.NOT_FOUND);
+      }
+
+      return product;
     } catch (error) {
-      throw new Error('Erro ao buscar produto');
+      throw new HttpException(
+        'Erro ao buscar produto',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
     try {
       const updateProduct = await this.prisma.product.update({
-        where: { id: id },
+        where: { id },
         data: updateProductDto,
       });
 
       return updateProduct;
     } catch (error) {
       throw new HttpException(
-        'Erro ao criar o produto',
+        'Erro ao atualizar o produto',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -95,9 +111,7 @@ export class ProductService {
   async remove(id: number) {
     try {
       return await this.prisma.product.delete({
-        where: {
-          id,
-        },
+        where: { id },
       });
     } catch (error) {
       throw new HttpException(

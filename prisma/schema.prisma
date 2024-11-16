@@ -38,6 +38,8 @@ model Product {
   updatedAt   DateTime  @updatedAt
   cartItems   CartItem[]
   orderItems  OrderItem[]
+  vehicleModelId Int?
+  vehicleModel VehicleModel? @relation(fields: [vehicleModelId], references: [id])
 }
 
 model Category {
@@ -111,6 +113,7 @@ model VehicleModel {
   name        String
   brand      VehicleBrand @relation(fields: [brandId], references: [id])
   brandId    Int
+  products   Product[]
 }
 
 
