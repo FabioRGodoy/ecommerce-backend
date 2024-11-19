@@ -31,7 +31,7 @@ export class ModelsService {
 
       return newModel;
     } catch (error) {
-      console.log(error);
+      console.error(error);
       throw new HttpException(
         'Erro ao criar o modelo',
         HttpStatus.INTERNAL_SERVER_ERROR,
