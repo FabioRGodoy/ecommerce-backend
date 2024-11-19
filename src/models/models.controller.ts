@@ -10,6 +10,7 @@ import {
 import { ModelsService } from './models.service';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
+import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 
 @Controller('models')
 export class ModelsController {
@@ -20,6 +21,7 @@ export class ModelsController {
     return this.modelsService.create(createModelDto);
   }
 
+  @IsPublic()
   @Get()
   findAll() {
     return this.modelsService.findAll();

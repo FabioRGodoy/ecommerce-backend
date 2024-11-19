@@ -71,9 +71,11 @@ export class BrandService {
 
   async remove(id: number) {
     try {
-      return await this.prisma.vehicleBrand.delete({
+      await this.prisma.vehicleBrand.delete({
         where: { id },
       });
+
+      return { status: HttpStatus.OK };
     } catch (error) {
       throw new HttpException(
         'Erro ao deletar a marca',

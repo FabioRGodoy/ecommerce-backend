@@ -2,13 +2,22 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { BrandService } from 'src/brand/brand.service';
 
 @Injectable()
 export class ModelsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly brands: BrandService,
+  ) {}
 
   async create(createModelDto: CreateModelDto) {
     try {
+      const brand = await this.brands.findOne(+createModelDto.brandId);
+
+      if (!brand)
+        throw new HttpException('Erro ao buscar modelos', HttpStatus.NOT_FOUND);
+
       const newModel = await this.prisma.vehicleModel.create({
         data: {
           name: createModelDto.name,
@@ -19,8 +28,10 @@ export class ModelsService {
           },
         },
       });
+
       return newModel;
     } catch (error) {
+      console.log(error);
       throw new HttpException(
         'Erro ao criar o modelo',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -83,9 +94,11 @@ export class ModelsService {
 
   async remove(id: number) {
     try {
-      return await this.prisma.vehicleModel.delete({
+      await this.prisma.vehicleModel.delete({
         where: { id },
       });
+
+      return { status: HttpStatus.OK };
     } catch (error) {
       throw new HttpException(
         'Erro ao deletar o modelo',
