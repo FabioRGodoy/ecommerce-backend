@@ -1,7 +1,17 @@
-import { Controller, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Get,
+} from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { User } from '@prisma/client';
 
 @Controller('cart')
 export class CartController {
@@ -10,6 +20,11 @@ export class CartController {
   @Post()
   create(@Body() createCartDto: CreateCartDto) {
     return this.cartService.create(createCartDto);
+  }
+
+  @Get()
+  getCartByUserId(@CurrentUser() user: User) {
+    return this.cartService.getCartByUserId(user);
   }
 
   @Patch(':id')

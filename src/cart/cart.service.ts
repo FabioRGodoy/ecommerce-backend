@@ -7,7 +7,7 @@ import {
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Cart } from '@prisma/client';
+import { Cart, User } from '@prisma/client';
 
 @Injectable()
 export class CartService {
@@ -16,6 +16,28 @@ export class CartService {
   private handleError(message: string) {
     console.error(message);
     throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  async getCartByUserId(user: User): Promise<Cart> {
+    try {
+      const cart = await this.prisma.cart.findUnique({
+        where: {
+          userId: user.id,
+        },
+      });
+
+      if (!cart) {
+        throw new HttpException(
+          'Carrinho não encontrado',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      return cart;
+    } catch (error) {
+      console.error('Erro ao buscar o carrinho:', error);
+      this.handleError('Erro ao buscar o carrinho');
+    }
   }
 
   async create(createCartDto: CreateCartDto): Promise<Cart> {
@@ -34,7 +56,7 @@ export class CartService {
 
       return cart;
     } catch (error) {
-      this.handleError('Erro ao criar o carrinho');
+      console.error('Erro ao criar carrinho: ', error);
     }
   }
 
