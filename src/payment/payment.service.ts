@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import axios from 'axios';
 
 @Injectable()
 export class PaymentService {
-  create(createPaymentDto: CreatePaymentDto) {
-    return 'This action adds a new payment';
+  private readonly asaasApiUrl = process.env.ASSAS_API_BASE_ADDRESS;
+  private readonly asaasApiKey = process.env.ASAAS_API_KEY;
+
+  async createCustomer(customerData: any) {
+    const response = await axios.post(
+      `${this.asaasApiUrl}/customers`,
+      customerData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          access_token: this.asaasApiKey,
+        },
+      },
+    );
+    return response.data;
   }
 
-  findAll() {
-    return `This action returns all payment`;
+  async createCharge(chargeData: any) {
+    const response = await axios.post(
+      `${this.asaasApiUrl}/payments`,
+      chargeData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          access_token: this.asaasApiKey,
+        },
+      },
+    );
+    return response.data;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} payment`;
-  }
-
-  update(id: number, updatePaymentDto: UpdatePaymentDto) {
-    return `This action updates a #${id} payment`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} payment`;
+  async handleWebhook(data: any) {
+    console.log(data);
+    // TODO: lidar com eventos necessarios, e ir alterando status da order no banco
   }
 }

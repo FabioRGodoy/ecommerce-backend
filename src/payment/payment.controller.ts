@@ -1,34 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { CreateCustomerDto } from './dto/create-customer.dto';
+import { CreateChargeDto } from './dto/create-charger.dto';
 
-@Controller('payment')
+@Controller('payments')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @Post()
-  create(@Body() createPaymentDto: CreatePaymentDto) {
-    return this.paymentService.create(createPaymentDto);
+  @Post('customer')
+  @HttpCode(HttpStatus.CREATED)
+  async createCustomer(@Body() customerData: CreateCustomerDto) {
+    return this.paymentService.createCustomer(customerData);
   }
 
-  @Get()
-  findAll() {
-    return this.paymentService.findAll();
+  @Post('charge')
+  @HttpCode(HttpStatus.CREATED)
+  async createCharge(@Body() chargeData: CreateChargeDto) {
+    return this.paymentService.createCharge(chargeData);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paymentService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-    return this.paymentService.update(+id, updatePaymentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paymentService.remove(+id);
+  @Post('webhook')
+  async handleWebhook(@Body() data: any) {
+    return this.paymentService.handleWebhook(data);
   }
 }
