@@ -86,12 +86,15 @@ model Order {
   userId          Int
   orderDate       DateTime      @default(now())
   orderStatus     OrderStatus
+  paymentStatus   PaymentStatus
   orderItems      OrderItem[]
   shippingAddress String?
   shippingCity    String?
   shippingState   String?
   shippingZip     String?
   total           Decimal
+  payment         Payment?      @relation(fields: [paymentId], references: [id])
+  paymentId       String?       @unique
 }
 
 model OrderItem {
@@ -102,6 +105,20 @@ model OrderItem {
   productId      Int
   quantity      Int
   unitPrice      Decimal
+}
+
+model Payment {
+  id                String   @id
+  order             Order?
+  value             Decimal
+  netValue          Decimal
+  status            PaymentStatus
+  paymentDate       DateTime?
+  dueDate           DateTime
+  installmentNumber Int
+  invoiceUrl        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model VehicleBrand {
@@ -126,3 +143,9 @@ enum OrderStatus {
   Delivered
   Cancelled
 }
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+}
+
