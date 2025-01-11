@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, PaymentStatus } from '@prisma/client';
 
 @Injectable()
 export class OrderService {
@@ -42,6 +42,7 @@ export class OrderService {
         },
         total,
         orderStatus: OrderStatus.Pending,
+        paymentStatus: PaymentStatus.PENDING,
       },
     });
 
