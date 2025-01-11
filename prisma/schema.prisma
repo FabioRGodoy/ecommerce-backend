@@ -1,0 +1,151 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String  @unique
+  password  String
+  age       Int?
+  address   String?
+  city      String?
+  state     String?
+  zip       String?
+  phone     String?
+  cart      Cart?    @relation(name: "UserCart")
+  cartId    Int?
+  orders    Order[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Decimal
+  imageUrl    String?
+  stock       Int
+  categories  CategoryToProduct[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  vehicleModelId Int?
+  vehicleModel VehicleModel? @relation(fields: [vehicleModelId], references: [id])
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  products    CategoryToProduct[]
+}
+
+model CategoryToProduct {
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  category  Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+
+  @@id([productId, categoryId])
+}
+
+model Cart {
+  id            Int            @id @default(autoincrement())
+  user          User           @relation(name: "UserCart", fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int            @unique
+  items         CartItem[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model CartItem {
+  id             Int      @id @default(autoincrement())
+  cart           Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId         Int
+  product        Product  @relation(fields: [productId], references: [id])
+  productId      Int
+  quantity       Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([cartId, productId])
+}
+
+model Order {
+  id              Int           @id @default(autoincrement())
+  user            User          @relation(fields: [userId], references: [id])
+  userId          Int
+  orderDate       DateTime      @default(now())
+  orderStatus     OrderStatus
+  paymentStatus   PaymentStatus
+  orderItems      OrderItem[]
+  shippingAddress String?
+  shippingCity    String?
+  shippingState   String?
+  shippingZip     String?
+  total           Decimal
+  payment         Payment?      @relation(fields: [paymentId], references: [id])
+  paymentId       String?       @unique
+}
+
+model OrderItem {
+  id             Int      @id @default(autoincrement())
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId        Int
+  product        Product  @relation(fields: [productId], references: [id])
+  productId      Int
+  quantity      Int
+  unitPrice      Decimal
+}
+
+model Payment {
+  id                String   @id
+  order             Order?
+  value             Decimal
+  netValue          Decimal
+  status            PaymentStatus
+  paymentDate       DateTime?
+  dueDate           DateTime
+  installmentNumber Int
+  invoiceUrl        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model VehicleBrand {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  models      VehicleModel[]
+}
+
+model VehicleModel {
+  id          Int          @id @default(autoincrement())
+  name        String
+  brand      VehicleBrand @relation(fields: [brandId], references: [id])
+  brandId    Int
+  products   Product[]
+}
+
+
+enum OrderStatus {
+  Pending
+  Processing
+  Shipped
+  Delivered
+  Cancelled
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+}
+
